@@ -25,7 +25,7 @@ pipeline {
 				fi
 				"""
 
-				// Run container in detached mode with specified port mapping
+				// Run container in detached mode with specified port mapping 
 				sh "docker run -d -it -p ${HOST_PORT}:${CONTAINER_PORT} --name ${CONTAINER_NAME} ${DOCKER_IMAGE} /bin/bash"
 
 				// start apache
