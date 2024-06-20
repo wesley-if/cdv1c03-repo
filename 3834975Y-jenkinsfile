@@ -1,0 +1,73 @@
+pipeline {
+	agent any
+
+	environment {
+        MY_POLITEID = '3834975Y'
+        DOCKER_IMAGE = '3834975y-image'
+        CONTAINER_NAME = '3834975Y-Server'
+        HOST_PORT = '32500'
+        CONTAINER_PORT = '80'
+    }
+
+	stages {
+		stage('3834975Y-Stage1') {
+			steps {
+				echo "${MY_POLITEID}-Stage 1: Setup Release Environment Completed."
+			}
+		}
+
+		stage('3834975Y-Stage2') {
+			steps {
+				// Remove existing container if exists
+				sh """
+				if [ \$(docker ps -a -q -f name=${CONTAINER_NAME}) ]; then
+					docker rm -f ${CONTAINER_NAME}
+				fi
+				"""
+
+				// Run container in detached mode with specified port mapping
+				sh "docker run -d -it -p ${HOST_PORT}:${CONTAINER_PORT} --name ${CONTAINER_NAME} ${DOCKER_IMAGE} /bin/bash"
+
+				// start apache
+				sh "docker exec ${CONTAINER_NAME} service apache2 start"
+
+				echo "${MY_POLITEID}-Stage 2: Server Setup Completed"
+			}
+		}
+
+		stage('3834975Y-Stage 3 Parallel') {
+			parallel {
+				stage(' ') {
+					steps {
+						echo "${MY_POLITEID}-Stage 3 Parallel: Security Testing"
+					}
+				}
+
+				stage('3834975Y-Stage 3a') {
+					steps {
+						echo "${MY_POLITEID}-Stage 3A: SQL Injection (SQLI) Test Completed"
+					}
+				}
+
+				stage('3834975Y-Stage 3b') {
+					steps {
+						echo "${MY_POLITEID}-Stage 3B: X-Site Scripting (XSS) Test Completed"
+					}
+				}
+			}
+		}
+
+		stage('3834975Y-Stage4') {
+			steps {
+				// prompt for approval
+				input("Hello ${MY_POLITEID}, permission to proceed to next phase?")
+			}
+		}
+
+		stage('3834975Y-Stage5') {
+			steps {
+				echo "Stage5_${MY_POLITEID} : Ready for next phase"
+			}
+		}
+	}
+}
